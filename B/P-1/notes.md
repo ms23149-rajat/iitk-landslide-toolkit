@@ -1,0 +1,69 @@
+# Installation Notes — TRIGRS v2.1
+**Intern:** Rajat (Group B, SURGE/SARIP 2026)
+**Machine:** labws2, Ubuntu 24.04 LTS
+**Date:** May 2026
+
+## What Went Right
+- gfortran, f95, and mpif90 were already installed on the lab machine
+- git clone from USGS GitLab worked first time
+- All 38 Fortran source files compiled without errors
+- TopoIndex and both TRIGRS programs (trg, prg) compiled successfully
+- Tutorial test case ran and produced correct FS output
+
+## Gotchas — Read This Before You Start!
+
+### 1. Double-nested folder from git clone
+If you are already inside a landslides-trigrs folder when you run
+git clone, it creates landslides-trigrs/landslides-trigrs/.
+Fix: always run git clone from your home folder (~).
+
+### 2. GSL library symbolic links needed
+libgsl-dev was not installed and sudo access was not available.
+The .so files existed but without the correct names.
+Fix: create symbolic links in ~/lib/
+  ln -s /usr/lib/x86_64-linux-gnu/libgsl.so.27 ~/lib/libgsl.so
+  ln -s /usr/lib/x86_64-linux-gnu/libgslcblas.so.0 ~/lib/libgslcblas.so
+Then compile with: make LDFLAGS="-w -O3 -L$HOME/lib"
+
+### 3. Capital D in tr_in.txt paths
+The file uses Data/tutorial/ but Linux requires data/tutorial/
+Fix: sed -i 's|Data/|data/|g' tr_in.txt
+
+### 4. TopoIndex source files not in TRIGRS folder
+The Makefile expects TopoIndex files in src/TRIGRS/
+Fix: cp ../TopoIndex/* . (run from inside src/TRIGRS/)
+
+### 5. tpx_in.txt missing tutorial/ in paths
+Fix: sed -i 's|data/dem.asc|data/tutorial/dem.asc|g' tpx_in.txt
+     sed -i 's|data/directions.asc|data/tutorial/directions.asc|g' tpx_in.txt
+
+## AI Tools Used
+- Claude (Anthropic) used as step-by-step mentor throughout installation
+- Helped diagnose GSL linking error and devise symbolic link workaround
+- Explained Makefile structure and compilation process
+
+## Suggestions for Next Year's Interns
+- Ask the lab admin to install libgsl-dev before you start — saves one hour
+- Read tr_in.txt carefully before running — check all file paths exist
+- The tutorial test case in data/tutorial/ is well designed — run it first
+- Do not skip TopoIndex — TRIGRS will fail without its routing files
+
+## Parallel Version (prg) Test Results
+**Machine:** labws2 (32 processors available)
+**Date:** May 2026
+
+### Timing Comparison (tutorial 10x10 grid, 100 cells)
+| Version | Processors | Time   |
+|---------|------------|--------|
+| trg (serial)   | 1  | 0.005s |
+| prg (parallel) | 4  | 0.656s |
+
+### Key Findings
+- Parallel version runs correctly on 4 processors ✅
+- Results identical to serial version (verified with diff) ✅
+- Parallel is SLOWER on small test case — expected behaviour
+- Alvioli 2016 shows speedup only appears on large grids (>1M cells)
+- MPI overhead dominates for small problems
+
+### Command to run parallel version
+mpirun -np 4 src/TRIGRS/prg tr_in.txt
