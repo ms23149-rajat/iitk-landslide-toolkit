@@ -67,3 +67,25 @@ Fix: sed -i 's|data/dem.asc|data/tutorial/dem.asc|g' tpx_in.txt
 
 ### Command to run parallel version
 mpirun -np 4 src/TRIGRS/prg tr_in.txt
+
+## Real Terrain Run — Kerala Western Ghats
+**Date:** May 2026
+**Study area:** Idukki District, Kerala (76.8-77.0°E, 9.8-10.0°N)
+**DEM:** Copernicus GLO-30 (DS-13), 30m resolution
+**Grid size:** 735 x 742 = 537,672 valid cells
+
+### Rainfall Input (Kerala 2018 style)
+- Period 1 (0-48hrs): 3mm/hr light rainfall
+- Period 2 (48-60hrs): 15mm/hr heavy rainfall
+
+### Results at 60 hours
+- Unstable cells (FS<1.0):      89,558 (16.7%)
+- Marginally stable (1.0-1.2):  61,920 (11.5%)
+- Stable cells (FS>=1.2):      386,194 (71.8%)
+- Minimum FS: 0.248
+- Mean FS: 2.321
+
+### Key Finding
+16.7% of the study area shows FS<1.0 after heavy
+rainfall — consistent with widespread 2018 Kerala
+landsliding observations.
