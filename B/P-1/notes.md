@@ -89,3 +89,39 @@ mpirun -np 4 src/TRIGRS/prg tr_in.txt
 16.7% of the study area shows FS<1.0 after heavy
 rainfall — consistent with widespread 2018 Kerala
 landsliding observations.
+
+## Kerala Real Terrain Run Difficulties
+
+### 1. Flow Direction Convergence Never Completed
+TopoIndex stopped at "Correcting cell index numbers" silently.
+Root cause: circular flow paths in direction grid.
+Attempts: Python D8, GRASS export, ESRI vs TopoIndex numbering.
+Final solution: Used GRASS r.fill.dir directions but ran
+TRIGRS without runoff routing (missing TI files = auto skip).
+TRIGRS runs successfully without routing. ✅
+
+### 2. All Input Grids Must Match DEM Nodata Exactly
+Every .asc file must have IDENTICAL nodata cells as DEM.
+Even one extra nodata cell causes Grid mismatch error.
+Fix: Python script forcing all grids to use DEM nodata mask.
+
+### 3. TIgrid_size.txt nwf Value Wrong
+TopoIndex writes nwf=1 when routing fails.
+TRIGRS needs nwf >= imax to allocate arrays.
+Fix: Manually set nwf = imax = 537672 in TIgrid_size.txt
+
+### 4. tr_in.txt Line 57 Format Error
+Flag value needs TWO values on same line.
+Wrong:   0
+Correct: 0,1
+Fix: sed -i 's/^0$/0,1/' tr_in.txt
+
+### 5. kerala_run.sh Not Fully Automated
+Several manual Python scripts needed during processing.
+Full automation is a TODO for next intern.
+Follow notes.md step by step instead.
+
+## Time Taken
+Tutorial install and test: ~3 hours
+Kerala real terrain run:   ~6 hours (flow direction debugging)
+Total P-1 time:            ~9 hours
